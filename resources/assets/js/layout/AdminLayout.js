@@ -13,7 +13,14 @@ export const AdminLayout = () => {
 
     const loadUser = async () => {
         try {
-            const data = await getUser();
+            const headers = localStorage.getItem("token")
+                ? {
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  }
+                : {};
+            const data = await getUser({
+                headers,
+            });
             setUser(data);
         } catch (e) {
             navigate("/admin/login");

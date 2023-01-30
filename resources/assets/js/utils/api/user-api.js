@@ -1,8 +1,8 @@
 import instance from "../instance";
 
-export const getUser = async () =>
+export const getUser = async (options = {}) =>
     instance()
-        .get("/getUser")
+        .get("/getUser", options)
         .then((res) => res.data);
 
 export const login = async (payload) =>
