@@ -2,16 +2,17 @@ import React from "react";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import {login} from "../../../utils/api/user-api";
 
-export default function AuthPage({ urlAfterAuth, requestAuth }) {
+export default function AuthPage() {
     const navigate = useNavigate();
 
     const onSubmit = async (values) => {
         try {
-            const data = await requestAuth(values);
+            const data = await login(values);
             localStorage.setItem("token", data.token);
             toast.success("Вы успешно авторизовались");
-            navigate(urlAfterAuth);
+            navigate('/admin/');
         } catch (e) {
             const message = e.response?.data?.message ?? "Произошла ошибка";
             toast.error(message);
