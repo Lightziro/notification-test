@@ -1,0 +1,73 @@
+version: "3.3"
+
+services:
+    backend:
+        container_name: laravel
+        image: fgh151/php:8.2-dev
+        restart: unless-stopped
+        volumes:
+            - ./:/var/www/html
+            - .env:/var/www/html/.env
+            - ./docker/backend_init.sh:/init.sh
+        networks:
+            - app
+        ports:
+            - 9000:9000
+        depends_on:
+            - database
+            - supervisor
+        links:
+            - database
+            - supervisor
+
+    nginx:
+        container_name: nginx
+        image: nginx:1.19-alpine
+        restart: unless-stopped
+        ports:
+            - '80:80'
+        volumes:
+            - ./:/var/www/html
+            - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - app
+
+    database:
+        container_name: db
+        image: mysql
+        env_file: .env
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_DATABASE: "${DB_DATABASE}"
+            MYSQL_USER: "${DB_USERNAME}"
+            MYSQL_PASSWORD: "${DB_PASSWORD}"
+            MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+        networks:
+            - app
+        ports:
+            - 3306:3306
+        volumes:
+            - ./mysqldb:/var/lib/mysql
+            - ./dumps:/dumps
+
+    supervisor:
+        container_name: supervisor
+        build: ./docker/supervisor
+        volumes:
+            - ./:/var/www/html
+        ports:
+            - '8080:80'
+            - '6001:6001'
+        depends_on:
+            - database
+        links:
+            - database
+        networks:
+            - app
+
+networks:
+    app:
+        driver: bridge
+volumes:
+    enlive-vendor:
+    mysqldb:
